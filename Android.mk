@@ -1,54 +1,52 @@
 # Copyright 2006 The Android Open Source Project
 
-# Setting LOCAL_PATH will mess up all-subdir-makefiles, so do it beforehand.
-legacy_modules := power uevent wifi qemu qemu_tracing
+lib_LTLIBRARIES += \
+    %reldir%/libandroid-hardware-legacy.la
 
-SAVE_MAKEFILES := $(call all-named-subdir-makefiles,$(legacy_modules))
-LEGACY_AUDIO_MAKEFILES := $(call all-named-subdir-makefiles,audio)
+%canon_reldir%_libandroid_hardware_legacy_la_SOURCES =
 
-LOCAL_PATH:= $(call my-dir)
-include $(CLEAR_VARS)
+%canon_reldir%_libandroid_hardware_legacy_la_LIBADD = \
+    $(LOG_LIBS) \
+    $(CUTILS_LIBS)
 
-LOCAL_SHARED_LIBRARIES := libcutils liblog
+%canon_reldir%_libandroid_hardware_legacy_la_LDFLAGS = \
+    $(AM_LDFLAGS) \
+    $(libtool_opts)
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+%canon_reldir%_libandroid_hardware_legacy_la_CPPFLAGS = \
+    $(AM_CPPFLAGS) \
+    $(LOG_CFLAGS) \
+    $(CUTILS_CFLAGS)
 
-LOCAL_CFLAGS  += -DQEMU_HARDWARE -Wno-unused-parameter -Wno-gnu-designator
-QEMU_HARDWARE := true
+if WITH_QEMU
+%canon_reldir%_libandroid_hardware_legacy_la_CPPFLAGS += \
+    -DQEMU_HARDWARE
+endif
 
-LOCAL_SHARED_LIBRARIES += libdl
+%canon_reldir%_libandroid_hardware_legacy_la_CFLAGS = \
+    $(AM_CFLAGS) \
+    -Wno-unused-parameter
 
-include $(SAVE_MAKEFILES)
+include $(srcdir)/%reldir%/power/Android.mk
+include $(srcdir)/%reldir%/uevent/Android.mk
+include $(srcdir)/%reldir%/wifi/Android.mk
+include $(srcdir)/%reldir%/qemu/Android.mk
+include $(srcdir)/%reldir%/qemu_tracing/Android.mk
 
-LOCAL_MODULE:= libhardware_legacy
+pkgconfig_DATA += \
+	android-hardware-legacy-$(LAARID_API_VERSION).pc
 
-include $(BUILD_SHARED_LIBRARY)
+lib_LTLIBRARIES += \
+    %reldir%/libandroid-power.la
 
-# static library for librpc
-include $(CLEAR_VARS)
-
-LOCAL_MODULE:= libpower
-
-LOCAL_SRC_FILES += power/power.c
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
-
-include $(BUILD_STATIC_LIBRARY)
-
-# shared library for various HALs
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libpower
-
-LOCAL_SRC_FILES := power/power.c
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
-
-LOCAL_SHARED_LIBRARIES := libcutils
-
-include $(BUILD_SHARED_LIBRARY)
-
-# legacy_audio builds it's own set of libraries that aren't linked into
-# hardware_legacy
-include $(LEGACY_AUDIO_MAKEFILES)
+%canon_reldir%_libandroid_power_la_CPPFLAGS = \
+    $(AM_CPPFLAGS) \
+    $(LOG_CFLAGS) \
+    $(CUTILS_CFLAGS)
+%canon_reldir%_libandroid_power_la_SOURCES = \
+    %reldir%/power/power.c
+%canon_reldir%_libandroid_power_la_LIBADD = \
+    $(CUTILS_LIBS)
+%canon_reldir%_libandroid_power_la_LDFLAGS = \
+    $(AM_LDFLAGS) \
+    $(libtool_opts)
