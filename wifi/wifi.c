@@ -39,8 +39,8 @@
 #include "cutils/misc.h"
 #include "cutils/properties.h"
 
-#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
-#include <sys/_system_properties.h>
+#define _REALLY_INCLUDE_BIONIC_PROPERTIES_IMPL_H_
+#include <bionic/properties_impl.h>
 
 extern int do_dhcp();
 extern int ifc_init();
@@ -107,8 +107,8 @@ static const char DRIVER_MODULE_NAME[]  = WIFI_DRIVER_MODULE_NAME;
 static const char DRIVER_MODULE_TAG[]   = WIFI_DRIVER_MODULE_NAME " ";
 static const char DRIVER_MODULE_PATH[]  = WIFI_DRIVER_MODULE_PATH;
 static const char DRIVER_MODULE_ARG[]   = WIFI_DRIVER_MODULE_ARG;
-#endif
 static const char FIRMWARE_LOADER[]     = WIFI_FIRMWARE_LOADER;
+#endif
 static const char DRIVER_PROP_NAME[]    = "wlan.driver.status";
 static const char SUPPLICANT_NAME[]     = "wpa_supplicant";
 static const char SUPP_PROP_NAME[]      = "init.svc.wpa_supplicant";
@@ -117,8 +117,9 @@ static const char P2P_PROP_NAME[]       = "init.svc.p2p_supplicant";
 static const char SUPP_CONFIG_TEMPLATE[]= "/system/etc/wifi/wpa_supplicant.conf";
 static const char SUPP_CONFIG_FILE[]    = "/data/misc/wifi/wpa_supplicant.conf";
 static const char P2P_CONFIG_FILE[]     = "/data/misc/wifi/p2p_supplicant.conf";
-static const char CONTROL_IFACE_PATH[]  = "/data/misc/wifi/sockets";
+#ifdef WIFI_DRIVER_MODULE_PATH
 static const char MODULE_FILE[]         = "/proc/modules";
+#endif
 
 static const char IFNAME[]              = "IFNAME=";
 #define IFNAMELEN			(sizeof(IFNAME) - 1)
@@ -135,6 +136,7 @@ static char supplicant_name[PROPERTY_VALUE_MAX];
 /* Is either SUPP_PROP_NAME or P2P_PROP_NAME */
 static char supplicant_prop_name[PROPERTY_KEY_MAX];
 
+#ifdef WIFI_DRIVER_MODULE_PATH
 static int insmod(const char *filename, const char *args)
 {
     void *module;
@@ -170,6 +172,7 @@ static int rmmod(const char *modname)
              modname, strerror(errno));
     return ret;
 }
+#endif // WIFI_DRIVER_MODULE_PATH
 
 int do_dhcp_request(int *ipaddr, int *gateway, int *mask,
                     int *dns1, int *dns2, int *server, int *lease) {
@@ -406,7 +409,6 @@ int ensure_config_file_exists(const char *config_file)
 {
     char buf[2048];
     int srcfd, destfd;
-    struct stat sb;
     int nread;
     int ret;
 
@@ -474,7 +476,7 @@ int wifi_start_supplicant(int p2p_supported)
     char supp_status[PROPERTY_VALUE_MAX] = {'\0'};
     int count = 200; /* wait at most 20 seconds for completion */
     const prop_info *pi;
-    unsigned serial = 0, i;
+    unsigned serial = 0;
 
     if (p2p_supported) {
         strcpy(supplicant_name, P2P_SUPPLICANT_NAME);

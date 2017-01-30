@@ -26,7 +26,7 @@
 #include <pthread.h>
 
 #define LOG_TAG "power"
-#include <utils/Log.h>
+#include <log/log.h>
 
 enum {
     ACQUIRE_PARTIAL_WAKE_LOCK = 0,
@@ -91,7 +91,6 @@ acquire_wake_lock(int lock, const char* id)
     if (g_error) return g_error;
 
     int fd;
-    size_t len;
     ssize_t ret;
 
     if (lock != PARTIAL_WAKE_LOCK) {
