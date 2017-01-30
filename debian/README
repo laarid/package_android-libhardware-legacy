@@ -1,0 +1,7 @@
+The Debian Package libandroid-hardware-legacy0
+----------------------------------------------
+
+This package contains libraries built from Android
+platform/hardware/libhardware_legacy.
+
+ -- You-Sheng Yang <vicamo@gmail.com>  Mon, 30 Jan 2017 11:01:34 +0800

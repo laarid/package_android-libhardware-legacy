@@ -1,0 +1,4 @@
+usr/include/android/hardware-legacy-*/hardware_legacy/*
+usr/lib/*/libandroid-hardware-legacy.a
+usr/lib/*/libandroid-hardware-legacy.so
+usr/lib/*/pkgconfig/android-hardware-legacy-0.0.pc

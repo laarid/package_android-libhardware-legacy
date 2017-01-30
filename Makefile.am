@@ -25,7 +25,9 @@ DISTCHECK_CONFIGURE_FLAGS = \
 	--disable-maintainer-mode
 
 GITIGNOREFILES = \
-	$(DIST_ARCHIVES)
+	$(DIST_ARCHIVES) \
+	build \
+	debian
 
 # Common/global flags
 # -------------------
