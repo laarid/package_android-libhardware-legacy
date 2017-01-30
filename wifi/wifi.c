@@ -21,8 +21,12 @@
 #include <dirent.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <poll.h>
+#include <sched.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include "hardware_legacy/wifi.h"
 #ifdef LIBWPA_CLIENT_EXISTS
@@ -34,7 +38,6 @@
 #include "cutils/memory.h"
 #include "cutils/misc.h"
 #include "cutils/properties.h"
-#include "private/android_filesystem_config.h"
 
 #define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
 #include <sys/_system_properties.h>
@@ -330,6 +333,29 @@ int wifi_unload_driver()
 #endif
 }
 
+static int get_wifi_uid_gid(uid_t *uid, gid_t *gid)
+{
+    const int uid_sbuf_len = sysconf(_SC_GETPW_R_SIZE_MAX);
+    char uid_sbuf[uid_sbuf_len];
+    struct passwd pwd, *pwd_result = NULL;
+
+    if (getpwnam_r("system", &pwd, uid_sbuf, uid_sbuf_len, &pwd_result))
+        return -1;
+    else
+        *uid = pwd_result->pw_uid;
+
+    const int gid_sbuf_len = sysconf(_SC_GETGR_R_SIZE_MAX);
+    char gid_sbuf[gid_sbuf_len];
+    struct group grp, *grp_result = NULL;
+
+    if (getgrnam_r("wifi", &grp, gid_sbuf, gid_sbuf_len, &grp_result))
+        return -1;
+    else
+        *gid = grp_result->gr_gid;
+
+    return 0;
+}
+
 int ensure_entropy_file_exists()
 {
     int ret;
@@ -365,9 +391,11 @@ int ensure_entropy_file_exists()
         return -1;
     }
 
-    if (chown(SUPP_ENTROPY_FILE, AID_SYSTEM, AID_WIFI) < 0) {
+    uid_t uid;
+    gid_t gid;
+    if (get_wifi_uid_gid(&uid, &gid) || chown(SUPP_ENTROPY_FILE, uid, gid) < 0) {
         ALOGE("Error changing group ownership of %s to %d: %s",
-             SUPP_ENTROPY_FILE, AID_WIFI, strerror(errno));
+             SUPP_ENTROPY_FILE, gid, strerror(errno));
         unlink(SUPP_ENTROPY_FILE);
         return -1;
     }
@@ -430,9 +458,11 @@ int ensure_config_file_exists(const char *config_file)
         return -1;
     }
 
-    if (chown(config_file, AID_SYSTEM, AID_WIFI) < 0) {
+    uid_t uid;
+    gid_t gid;
+    if (get_wifi_uid_gid(&uid, &gid) || chown(config_file, uid, gid) < 0) {
         ALOGE("Error changing group ownership of %s to %d: %s",
-             config_file, AID_WIFI, strerror(errno));
+             config_file, gid, strerror(errno));
         unlink(config_file);
         return -1;
     }
