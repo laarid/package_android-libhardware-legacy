@@ -1,3 +1,9 @@
+android-libhardware-legacy (0.0.2) testing; urgency=low
+
+  * Fix pkg-config.
+
+ -- You-Sheng Yang <vicamo@gmail.com>  Sun, 26 Mar 2017 11:39:10 +0800
+
 android-libhardware-legacy (0.0.1) testing; urgency=low
 
   * Initial Release.
