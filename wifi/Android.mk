@@ -44,4 +44,8 @@ libandroid_hardware_legacy_la_SOURCES += \
 #endif
 libandroid_hardware_legacy_la_LIBADD += \
     $(BIONIC_LIBS) \
-    $(NETUTILS_LIBS)
+    $(NETUTILS_LIBS) \
+    $(UIDMAP_LIBS)
+
+libandroid_hardware_legacy_la_CPPFLAGS += \
+    $(UIDMAP_CFLAGS)

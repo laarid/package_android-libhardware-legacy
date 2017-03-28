@@ -21,12 +21,9 @@
 #include <dirent.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <poll.h>
 #include <sched.h>
-#include <pwd.h>
-#include <grp.h>
 
 #include "hardware_legacy/wifi.h"
 #ifdef LIBWPA_CLIENT_EXISTS
@@ -38,6 +35,7 @@
 #include "cutils/memory.h"
 #include "cutils/misc.h"
 #include "cutils/properties.h"
+#include "android/uidmap.h"
 
 #define _REALLY_INCLUDE_BIONIC_PROPERTIES_IMPL_H_
 #include <bionic/properties_impl.h>
@@ -336,28 +334,10 @@ int wifi_unload_driver()
 #endif
 }
 
-static int get_wifi_uid_gid(uid_t *uid, gid_t *gid)
-{
-    const int uid_sbuf_len = sysconf(_SC_GETPW_R_SIZE_MAX);
-    char uid_sbuf[uid_sbuf_len];
-    struct passwd pwd, *pwd_result = NULL;
+static ANDROID_GID_GETTER_DECL(wifi);
+static ANDROID_GID_GETTER_IMPL(wifi)
 
-    if (getpwnam_r("system", &pwd, uid_sbuf, uid_sbuf_len, &pwd_result))
-        return -1;
-    else
-        *uid = pwd_result->pw_uid;
-
-    const int gid_sbuf_len = sysconf(_SC_GETGR_R_SIZE_MAX);
-    char gid_sbuf[gid_sbuf_len];
-    struct group grp, *grp_result = NULL;
-
-    if (getgrnam_r("wifi", &grp, gid_sbuf, gid_sbuf_len, &grp_result))
-        return -1;
-    else
-        *gid = grp_result->gr_gid;
-
-    return 0;
-}
+#define AGID_WIFI ANDROID_GID_GETTER_NAME(wifi)()
 
 int ensure_entropy_file_exists()
 {
@@ -394,11 +374,9 @@ int ensure_entropy_file_exists()
         return -1;
     }
 
-    uid_t uid;
-    gid_t gid;
-    if (get_wifi_uid_gid(&uid, &gid) || chown(SUPP_ENTROPY_FILE, uid, gid) < 0) {
+    if (chown(SUPP_ENTROPY_FILE, AUID_SYSTEM, AGID_WIFI) < 0) {
         ALOGE("Error changing group ownership of %s to %d: %s",
-             SUPP_ENTROPY_FILE, gid, strerror(errno));
+             SUPP_ENTROPY_FILE, AGID_WIFI, strerror(errno));
         unlink(SUPP_ENTROPY_FILE);
         return -1;
     }
@@ -460,11 +438,9 @@ int ensure_config_file_exists(const char *config_file)
         return -1;
     }
 
-    uid_t uid;
-    gid_t gid;
-    if (get_wifi_uid_gid(&uid, &gid) || chown(config_file, uid, gid) < 0) {
+    if (chown(config_file, AUID_SYSTEM, AGID_WIFI) < 0) {
         ALOGE("Error changing group ownership of %s to %d: %s",
-             config_file, gid, strerror(errno));
+             config_file, AGID_WIFI, strerror(errno));
         unlink(config_file);
         return -1;
     }

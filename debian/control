@@ -7,9 +7,10 @@ Build-Depends:
  autoconf-archive,
  pkg-config,
  libandroid-bionic0-dev (>= 0.1.4),
- libandroid-cutils0-dev (>= 0.0.12),
- libandroid-log0-dev (>= 0.0.12),
- libandroid-netutils0-dev (>= 0.0.12),
+ libandroid-cutils0-dev (>= 0.0.16),
+ libandroid-log0-dev (>= 0.0.16),
+ libandroid-netutils0-dev (>= 0.0.16),
+ libandroid-uidmap0-dev (>= 0.0.16),
 Standards-Version: 3.9.5
 Section: libs
 Homepage: https://github.com/laarid/package_android-libhardware-legacy
@@ -23,8 +24,8 @@ Architecture: any
 Multi-Arch: same
 Depends:
  libandroid-hardware-legacy0 (= ${binary:Version}),
- libandroid-cutils0-dev (>= 0.0.12),
- libandroid-log0-dev (>= 0.0.12),
+ libandroid-cutils0-dev (>= 0.0.16),
+ libandroid-log0-dev (>= 0.0.16),
  ${misc:Depends},
 Description: Android libhardware_legacy - development
  This package contains libhardware_legacy built from Android
