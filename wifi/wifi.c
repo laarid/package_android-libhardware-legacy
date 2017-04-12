@@ -25,6 +25,8 @@
 #include <poll.h>
 #include <sched.h>
 
+#include <bionic/bionic.h>
+
 #include "hardware_legacy/wifi.h"
 #ifdef LIBWPA_CLIENT_EXISTS
 #include "libwpa_client/wpa_ctrl.h"
